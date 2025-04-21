@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ChartsPanel extends JPanel
+public class ChartsPanel extends JPanel implements SelectionListener
 {
     private final List<InflationCollection> data;
     private String selectedCountry = null; // which country to display
@@ -127,5 +127,10 @@ public class ChartsPanel extends JPanel
         g2.rotate(-Math.PI / 2);
         g2.drawString("Inflation Rate", -panelHeight / 2, 20);
         g2.rotate(Math.PI / 2); // rotate back
+    }
+
+    @Override
+    public void selectionChanged(Selection match) {
+
     }
 }

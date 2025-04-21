@@ -11,69 +11,24 @@ import java.util.stream.Collectors;
 
 public class importData
 {
-    public static void main(String[] args)
-    {
-
-        String file = "inflation.csv"; // variable to hold file name
-        try
-        {
-            // read the line by line in the file as a stream
-            // holds the file data
-            List<InflationCollection> data = Files.lines(Paths.get(file)).skip(1).map(line ->
-                    {
-               // System.out.println("Line " + line); //was used for testing
+    public static List<InflationCollection> readCSV(String filepath) {
+        try {
+            return Files.lines(Paths.get(filepath))
+                    .skip(1)                            // skip header
+                    .map(line -> {
                         String[] parts = line.split(",");
-
-                        //check to make sure the line is not empty
-                        if (parts.length < 5)
-                        {
-                            return null;
-                        }
-
-                        // create a country column
-                        String country = parts[2].trim();
-                        // create Year column
-                        int year = Integer.parseInt(parts[3].trim());
-                        // create inflation column
+                        if (parts.length < 5) return null;
+                        String country       = parts[2].trim();
+                        int    year          = Integer.parseInt(parts[3].trim());
                         double inflationRate = Double.parseDouble(parts[4].trim());
-
-                        // create + return collection
                         return new InflationCollection(country, year, inflationRate);
                     })
-
-                    //filter out null results
                     .filter(Objects::nonNull)
-                    // put in list
-                    .toList();
-
-            // print the 1st line of attributes
-            if (!data.isEmpty())
-            {
-                System.out.println("First line Attributes: " + data.getFirst());
-            }
-
-            // Print the 10th line of attributes
-            if(data.size() >= 10)
-            {
-                System.out.println("10th line Attributes: " + data.get(9)); // 9 because we skipped header above
-            }
-
-            // print the total amount of data entries
-            System.out.println("Total data entries: " + data.size());
-            TablePanel.display(data);
-         }
-
-        catch (IOException e)
-         {
-             System.out.println("Error reading from file");
-             throw new RuntimeException(file);
-         }
-
-
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return List.of();  // or throw a RuntimeException
+        }
     }
 
-    public static List<InflationCollection> readCSV(String s)
-    {
-        return List.of();
-    }
 }

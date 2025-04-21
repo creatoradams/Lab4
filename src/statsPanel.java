@@ -2,7 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class statsPanel extends JPanel {
+public class statsPanel extends JPanel implements SelectionListener
+{
 
     // Keep references to labels so we can update them later
     private JLabel minLabel;
@@ -10,7 +11,8 @@ public class statsPanel extends JPanel {
     private JLabel averageLabel;
     private JLabel totalLabel;
 
-    public statsPanel(List<InflationCollection> data) {
+    public statsPanel(List<InflationCollection> data)
+    {
         setLayout(new GridLayout(4, 1));
 
         // Initialize labels
@@ -29,8 +31,10 @@ public class statsPanel extends JPanel {
         updateStats(data);
     }
 
-    public void updateStats(List<InflationCollection> newData) {
-        if (newData == null || newData.isEmpty()) {
+    public void updateStats(List<InflationCollection> newData)
+    {
+        if (newData == null || newData.isEmpty())
+        {
             minLabel.setText("Minimum Inflation Rate: N/A");
             maxLabel.setText("Maximum Inflation Rate: N/A");
             averageLabel.setText("Average Inflation Rate: N/A");
@@ -42,8 +46,9 @@ public class statsPanel extends JPanel {
         double max = Double.MIN_VALUE;
         double total = 0.0;
 
-        for (InflationCollection ic : newData) {
-            double rate = ic.getInflationRate();
+        for (InflationCollection i : newData)
+        {
+            double rate = i.getInflationRate();
             if (rate < min) min = rate;
             if (rate > max) max = rate;
             total += rate;
@@ -55,5 +60,11 @@ public class statsPanel extends JPanel {
         maxLabel.setText("Maximum Inflation Rate: " + String.format("%.2f", max));
         averageLabel.setText("Average Inflation Rate: " + String.format("%.2f", average));
         totalLabel.setText("Total Inflation Rate: " + String.format("%.2f", total));
+    }
+
+    @Override
+    public void selectionChanged(Selection event)
+    {
+        updateStats(event.slice());
     }
 }

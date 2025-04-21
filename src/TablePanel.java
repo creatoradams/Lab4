@@ -2,70 +2,79 @@ import java.awt.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 
 // GUI class to display part 1 of the GUI
-public class TablePanel extends JFrame
+public class TablePanel extends JFrame implements SelectionListener
 {
-    //
-    public TablePanel(List<InflationCollection> data)
-    {
+    private final DefaultTableModel model;
+    public TablePanel(List<InflationCollection> data) {
         // set frame title
-        super("Inflation Data");
+        super("Inflation Dashboard");
 
-        // Create panels
-        statsPanel statsPanel = new statsPanel(data);
-        ChartsPanel chartsPanel = new ChartsPanel(data);
-        DetailsPanel detailsPanel = new DetailsPanel(data, statsPanel, chartsPanel);
+        // Create the publisher
+        SelectionPub publisher = new SelectionPub();
 
+        //create the observers
+        statsPanel stats = new statsPanel(data);
+        ChartsPanel charts = new ChartsPanel(data);
+        DetailsPanel details = new DetailsPanel(data, publisher);
 
-        // colum headers to appear at top of frame
-        String[] columnNames = {"Country", "Year", "Inflation Rate"};
+        // setup observers
+        publisher.addListener(this);
+        publisher.addListener(stats);
+        publisher.addListener(charts);
 
-        // create a table with the column names
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
-
-        // use a for loop to go through data list and populate the table
-        for(InflationCollection inflation : data)
-        {
-            Object[] row = { inflation.getCountry(), inflation.getYear(), inflation.getInflationRate() };
-            model.addRow(row); // add data to the model
-        }
-        // create JTable that uses model and contains our rows of data
+        // build the data table
+        String[] cols = {"Country", "Year", "Inflation Rate"};
+        model = new DefaultTableModel(cols, 0);
         JTable table = new JTable(model);
-        // use scroll pane because lots of rows
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // add a tabbed pane to hold all panels
-        JTabbedPane tabbedPane = new JTabbedPane();
+        // fill in all data initially
+        data.forEach(d -> model.addRow(new Object[]{d.getCountry(),
+                d.getYear(), d.getInflationRate()}));
 
+        // put into tabs
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.addTab("Table", scrollPane);
+        tabs.addTab("Filter", details);
+        tabs.addTab("Stats", stats);
+        tabs.addTab("Charts", charts);
 
-        // add panels
-        tabbedPane.addTab("DetailData", detailsPanel);
-        tabbedPane.addTab("Stats", statsPanel);
-        tabbedPane.addTab("Charts", chartsPanel);
-
-        // use a JSplitPane to simultaneously use
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, tabbedPane);
-        splitPane.setDividerLocation(200);
-
-        // add the split pane to frame
-        add(splitPane, BorderLayout.CENTER);
-
-        // setup frame
-        add(scrollPane, BorderLayout.EAST);
-        add(tabbedPane, BorderLayout.CENTER);
-        setSize(800, 800);
+        // final
+        setLayout(new BorderLayout());
+        add(tabs, BorderLayout.CENTER);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
+        setLocationRelativeTo(null);
+    }
+    @Override
+    public void selectionChanged(Selection event)
+    {
+        // wipe old rows
+        model.setRowCount(0);
+
+        // repopulate
+        for(InflationCollection i : event.slice())
+        {
+            model.addRow(new Object[]{
+                    i.getCountry(),
+                    i.getYear(),
+                    i.getInflationRate()
+            });
+        }
     }
 
-    // method to launch GUI from importData class
     public static void display(List<InflationCollection> data)
     {
-        SwingUtilities.invokeLater(()->
-        {
-            TablePanel d = new TablePanel(data);
-            d.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            TablePanel panel = new TablePanel(data);
+            panel.setVisible(true);
         });
     }
 }
