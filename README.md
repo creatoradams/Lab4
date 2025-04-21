@@ -1,0 +1,2 @@
+The 2 design patterns I chose to implement were the Observer patterns and the Strategy pattern. I chose Observer and Strategy patterns because my panels were setup in a way that any new view would mean editing them. Now implementing a Selection Event my details panel can more efficiently operate.
+I created a class called appController which loads my CSV data in from importData and creates a SelectionPub object that is passed into the DetailsPanel.
